@@ -1,165 +1,87 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NAIM X LIVE</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NAIM X LIVE PLAYER</title>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
-*{box-sizing:border-box}
 body{
   margin:0;
-  background:#020617;
-  color:#00ff9c;
+  background:#000;
+  color:#0f0;
   font-family:monospace;
 }
 .header{
-  padding:12px;
+  padding:10px;
   text-align:center;
-  font-size:18px;
-  font-weight:bold;
-  background:#020617;
-  border-bottom:1px solid #00ff9c;
+  border-bottom:1px solid #0f0;
 }
 video{
   width:100%;
-  height:auto;
   background:black;
-  border-bottom:2px solid #00ff9c;
-}
-.controls{
-  padding:10px;
-}
-select{
-  width:100%;
-  padding:10px;
-  background:#020617;
-  color:#00ff9c;
-  border:1px solid #00ff9c;
-  border-radius:6px;
 }
 .status{
-  margin-top:8px;
-  font-size:13px;
+  padding:10px;
 }
-.tg-popup{
+.tg{
   position:fixed;
-  bottom:15px;
+  bottom:10px;
   left:50%;
   transform:translateX(-50%);
-  background:#020617;
-  border:1px solid #00ff9c;
-  padding:10px 14px;
-  border-radius:8px;
-  display:flex;
-  gap:10px;
-  align-items:center;
-  z-index:999;
+  background:#000;
+  border:1px solid #0f0;
+  padding:8px 12px;
 }
-.tg-popup a{
-  color:#020617;
-  background:#00ff9c;
-  padding:6px 10px;
-  border-radius:4px;
+.tg a{
+  color:black;
+  background:#0f0;
+  padding:4px 8px;
   text-decoration:none;
-  font-weight:bold;
-}
-.footer{
-  text-align:center;
-  font-size:11px;
-  padding:10px;
-  opacity:.7;
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">🔴 NAIM X LIVE</div>
-
+<div class="header">🔴 LIVE MATCH</div>
 <video id="video" controls autoplay muted playsinline></video>
+<div class="status" id="status">Loading...</div>
 
-<div class="controls">
-  <select id="quality"></select>
-  <div class="status" id="status">Loading stream...</div>
+<div class="tg">
+ Join Telegram <a href="https://t.me/YOUR_CHANNEL" target="_blank">JOIN</a>
 </div>
-
-<div class="tg-popup">
-  <span>📢 Join Telegram</span>
-  <a href="https://t.me/YOUR_CHANNEL" target="_blank">JOIN</a>
-</div>
-
-<div class="footer">Mobile Optimized • HLS Live Player</div>
 
 <script>
-/* ================= SOURCES ================= */
-
-const MATCHES = {
-  "ban-ind":{
-    "1080p":"https://bd-mc-fdlive.fancode.com/mumbai/139222_english_hls_e5da087ff762368_1ta-di_h264/1080p.m3u8",
-    "720p":"https://bd-mc-fdlive.fancode.com/mumbai/139222_english_hls_e5da087ff762368_1ta-di_h264/720p.m3u8"
-  },
-  "pak-sl":{
-    "1080p":"https://example.com/pak-sl-1080p.m3u8",
-    "720p":"https://example.com/pak-sl-720p.m3u8"
-  }
+const SOURCES = {
+  "ban-ind":"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+  "pak-sl":"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
 };
 
-/* ================= PARAM ================= */
-
 const params = new URLSearchParams(location.search);
-const game = params.get("game") || "ban-ind";
-
-/* ================= INIT ================= */
+const game = params.get("game");
 
 const video = document.getElementById("video");
-const quality = document.getElementById("quality");
 const status = document.getElementById("status");
 
-if(!MATCHES[game]){
-  status.innerText="❌ Match not found";
-  throw "Match not found";
-}
-
-Object.keys(MATCHES[game]).forEach(q=>{
-  const o=document.createElement("option");
-  o.value=MATCHES[game][q];
-  o.text=q;
-  quality.appendChild(o);
-});
-
-let hls;
-
-function play(url){
-  status.innerText="🔄 Loading...";
-  if(hls) hls.destroy();
-
+if(!SOURCES[game]){
+  status.innerText="Match not found";
+}else{
   if(Hls.isSupported()){
-    hls=new Hls({
-      liveSyncDuration:8,
-      maxBufferLength:30
-    });
-    hls.loadSource(url);
+    const hls = new Hls();
+    hls.loadSource(SOURCES[game]);
     hls.attachMedia(video);
     hls.on(Hls.Events.MANIFEST_PARSED,()=>{
       video.play();
-      status.innerText="▶ LIVE";
-    });
-    hls.on(Hls.Events.ERROR,()=>{
-      status.innerText="⚠ Stream expired / error";
+      status.innerText="LIVE";
     });
   }else{
-    video.src=url;
+    video.src = SOURCES[game];
     video.play();
-    status.innerText="▶ LIVE";
+    status.innerText="LIVE";
   }
 }
-
-play(quality.value);
-
-quality.onchange=()=>play(quality.value);
 </script>
 
 </body>
